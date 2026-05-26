@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aki-Cricket // The Sentient IPL Mind</title>
+  <!-- SEO Tags -->
+  <meta name="description" content="Challenge Aki-Cricket, the elite sentient AI sports mind. Can Aki guess your secret IPL player, team, or match scenario in 15 questions?">
+  <meta name="keywords" content="IPL, Indian Premier League, Cricket Game, AI Guessing Game, Akinator Cricket, Cricket Trivia">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏏</text></svg>">
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- Local Stylesheets -->
+  <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+  <!-- Animated Background Grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    
+    <!-- ==================== WELCOME SCREEN ==================== -->
+    <section id="screen-welcome" class="screen active">
+      <div class="welcome-card glass">
+        <div class="logo-area">
+          <div class="cricket-ball-hologram animated-hologram calm">
+            <div class="core-brain"></div>
+            <div class="seam-line"></div>
+            <div class="orbital-ring ring-1"></div>
+            <div class="orbital-ring ring-2"></div>
+          </div>
+          <h1 class="glitch-text" data-text="AKI-CRICKET">AKI-CRICKET</h1>
+          <p class="subtitle">The Sentient AI IPL Sports Mind</p>
+        </div>
+
+        <div class="welcome-intro">
+          <p>Think of an iconic IPL <strong>Player</strong>, <strong>Team</strong>, or <strong>Historic Match Scenario</strong>.</p>
+          <p>I will guess it in exactly <span class="highlight">15 Yes/No questions</span>. Dare to challenge my algorithms?</p>
+        </div>
+
+        <div class="game-selector">
+          <h2>SELECT CATEGORY TO BEGIN:</h2>
+          <div class="category-grid">
+            <button class="category-btn glass card-player" data-type="player">
+              <div class="card-badge">GOLD CLASS</div>
+              <span class="icon"><i class="fas fa-user-ninja"></i></span>
+              <span class="label">IPL Player</span>
+              <span class="desc">Active or legendary cricketers</span>
+              <div class="card-stats">
+                <div class="stat"><span class="lbl">POWER</span> <span class="val">99</span></div>
+                <div class="stat"><span class="lbl">DIFF</span> <span class="val">HARD</span></div>
+              </div>
+            </button>
+            <button class="category-btn glass card-team" data-type="team">
+              <div class="card-badge">CHAMPION</div>
+              <span class="icon"><i class="fas fa-users"></i></span>
+              <span class="label">IPL Team</span>
+              <span class="desc">Current or former franchises</span>
+              <div class="card-stats">
+                <div class="stat"><span class="lbl">POWER</span> <span class="val">95</span></div>
+                <div class="stat"><span class="lbl">DIFF</span> <span class="val">MED</span></div>
+              </div>
+            </button>
+            <button class="category-btn glass card-scenario" data-type="scenario">
+              <div class="card-badge">LEGENDARY</div>
+              <span class="icon"><i class="fas fa-history"></i></span>
+              <span class="label">Match Scenario</span>
+              <span class="desc">Iconic moments & finishes</span>
+              <div class="card-stats">
+                <div class="stat"><span class="lbl">POWER</span> <span class="val">98</span></div>
+                <div class="stat"><span class="lbl">DIFF</span> <span class="val">EXPERT</span></div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== GAMEPLAY SCREEN ==================== -->
+    <section id="screen-game" class="screen">
+      <div class="game-container glass">
+        <!-- 3D Stadium Viewport -->
+        <div class="stadium-viewport-container">
+          <div class="status-badge" id="aki-mood-badge">Exploratory Mode</div>
+          <div id="stadium-3d-container"></div>
+          <!-- Flying "6" overlay -->
+          <div id="flying-six-overlay" class="flying-six">6!</div>
+        </div>
+
+        <!-- Question Box -->
+        <div class="dialogue-box">
+          <div class="speaker">AKI-CRICKET (AI Commentator):</div>
+          <div class="banter-bubble" id="banter-text">
+            "Welcome to the middle! Let's see if you can handle my bowling."
+          </div>
+          <div class="question-text" id="question-text">
+            Is the player an active IPL cricketer?
+          </div>
+        </div>
+
+        <!-- Answer buttons -->
+        <div class="answer-buttons">
+          <button class="answer-btn yes-btn" data-val="Yes">
+            <i class="fas fa-check"></i> Yes
+          </button>
+          <button class="answer-btn no-btn" data-val="No">
+            <i class="fas fa-times"></i> No
+          </button>
+          <button class="answer-btn partially-btn" data-val="Partially">
+            <i class="fas fa-adjust"></i> Partially
+          </button>
+          <button class="answer-btn dontknow-btn" data-val="Don't Know">
+            <i class="fas fa-question"></i> Don't Know
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== GUESS SCREEN (AKI'S PROPOSAL) ==================== -->
+    <section id="screen-guess" class="screen">
+      <div class="guess-card glass">
+        <div class="sparkles">✨</div>
+        <div class="logo-area">
+          <div class="cricket-ball-hologram animated-hologram confident">
+            <div class="core-brain"></div>
+            <div class="seam-line"></div>
+            <div class="orbital-ring ring-1"></div>
+            <div class="orbital-ring ring-2"></div>
+          </div>
+          <h2 class="hologram-title">NEURAL LOCK ENGAGED</h2>
+          <p class="subtitle">My processors are 85%+ confident!</p>
+        </div>
+
+        <div class="guess-proposal">
+          <p class="guess-intro">Are you thinking of the IPL <span id="guess-type">Player</span>:</p>
+          <h1 class="guess-entity-name" id="guess-entity">Virat Kohli</h1>
+        </div>
+
+        <div class="guess-actions">
+          <button class="action-btn success-btn" id="confirm-guess-btn">
+            <i class="fas fa-trophy"></i> Yes, you got it!
+          </button>
+          <button class="action-btn fail-btn" id="reject-guess-btn">
+            <i class="fas fa-skull-crossbones"></i> No, that is incorrect!
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== WIN / LOSS SCREEN ==================== -->
+    <section id="screen-result" class="screen">
+      <div class="result-card glass">
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas"></canvas>
+
+        <div class="result-icon-container">
+          <span id="result-icon"><i class="fas fa-medal"></i></span>
+        </div>
+
+        <h1 class="result-title" id="result-title">AKI WINS!</h1>
+        <p class="result-subtitle" id="result-subtitle">Your mind is an open book to my algorithms.</p>
+
+        <div class="result-summary glass">
+          <div class="summary-row">
+            <span class="label">Target Entity:</span>
+            <span class="value highlight" id="result-entity">MS Dhoni</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Questions Asked:</span>
+            <span class="value" id="result-questions">8 / 15</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Aki's Mood:</span>
+            <span class="value" id="result-mood">Cocky</span>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="action-btn play-again-btn" id="restart-game-btn">
+            <i class="fas fa-redo"></i> Play Again
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Load Game Engine and App Controller -->
+  <script src="gameEngine.js?v=2"></script>
+  <script src="stadium3D.js?v=2"></script>
+  <script src="app.js?v=2"></script>
+</body>
+</html>

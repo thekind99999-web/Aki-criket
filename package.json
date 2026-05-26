@@ -1,0 +1,10 @@
+{
+  "name": "aki-cricket-prototype",
+  "version": "1.0.0",
+  "description": "Aki-Cricket Sentient IPL Guessing Game Prototype",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx http-server -p 8080"
+  },
+  "dependencies": {}
+}
