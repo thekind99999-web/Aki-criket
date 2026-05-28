@@ -67,7 +67,7 @@
     </div>
 
     <!-- ==================== DASHBOARD CONTAINER ==================== -->
-    <div id="dashboard-container" class="dashboard-layout hide">
+    <div id="dashboard-container" class="dashboard-layout" style="display: none;">
       
       <!-- Top Dashboard Header with Profile Info & Navigation Tabs -->
       <header class="dashboard-header glass">
@@ -253,7 +253,7 @@
               </div>
 
               <!-- AI Analysis Accordion Box -->
-              <div class="game-ai-insights glass hide" id="game-ai-insights-box">
+              <div class="game-ai-insights glass" id="game-ai-insights-box" style="display: none;">
                 <div class="insights-header" id="trigger-insights-toggle">
                   <h3><i class="fas fa-brain"></i> Aki's Match Analysis Insights</h3>
                   <i class="fas fa-chevron-down" id="insights-chevron"></i>
@@ -399,7 +399,7 @@
             </div>
 
             <!-- Typing indicator -->
-            <div class="chat-typing-indicator hide" id="chat-typing-indicator">
+            <div class="chat-typing-indicator" id="chat-typing-indicator" style="display: none;">
               <span></span><span></span><span></span> Aki is reading match records...
             </div>
 
@@ -445,14 +445,14 @@
             </div>
 
             <!-- Loader and processing states -->
-            <div class="expand-processing-box hide" id="expand-loader">
+            <div class="expand-processing-box" id="expand-loader" style="display: none;">
               <div class="spinner-neon"></div>
               <h3 id="expand-loader-title">Consulting Cricket Records...</h3>
               <p id="expand-loader-sub">Gemini is extracting attributes matching Aki's Bayesian Matrix.</p>
             </div>
 
             <!-- Expansion Success details -->
-            <div class="expand-success-box hide" id="expand-success-box">
+            <div class="expand-success-box" id="expand-success-box" style="display: none;">
               <div class="success-header">
                 <i class="fas fa-check-double"></i>
                 <div>
@@ -525,7 +525,7 @@
   </div>
 
   <!-- Global AI Dialog / Analysis Modal -->
-  <div class="modal-overlay hide" id="insights-modal">
+  <div class="modal-overlay" id="insights-modal" style="display: none;">
     <div class="modal-card glass">
       <div class="modal-header">
         <h3><i class="fas fa-comment-dots"></i> Aki's Match Analysis Summary</h3>

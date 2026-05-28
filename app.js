@@ -206,7 +206,7 @@ const initApp = () => {
   // Initialize Game Loop
   function startNewGame(category) {
     // Hide previous analysis
-    document.getElementById('game-ai-insights-box').classList.add('hide');
+    document.getElementById('game-ai-insights-box').style.display = 'none';
     document.getElementById('game-insights-content').innerText = '';
 
     game = new window.AkiGame.GameState(category);
@@ -557,7 +557,7 @@ const initApp = () => {
     document.getElementById('tab-login-btn').classList.add('active');
     document.getElementById('tab-signup-btn').classList.remove('active');
     authSubmitText.innerText = "Log In";
-    authErrorMsg.classList.add('hide');
+    authErrorMsg.style.display = 'none';
   });
 
   document.getElementById('tab-signup-btn').addEventListener('click', () => {
@@ -565,13 +565,13 @@ const initApp = () => {
     document.getElementById('tab-login-btn').classList.remove('active');
     document.getElementById('tab-signup-btn').classList.add('active');
     authSubmitText.innerText = "Register & Log In";
-    authErrorMsg.classList.add('hide');
+    authErrorMsg.style.display = 'none';
   });
 
   // Auth Form Submit
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    authErrorMsg.classList.add('hide');
+    authErrorMsg.style.display = 'none';
 
     const username = document.getElementById('auth-username').value.trim();
     const password = document.getElementById('auth-password').value;
@@ -593,7 +593,7 @@ const initApp = () => {
       playSound('click');
     } catch (err) {
       authErrorMsg.innerText = err.message || "Authentication failed.";
-      authErrorMsg.classList.remove('hide');
+      authErrorMsg.style.display = 'block';
       playSound('wrong');
     }
   });
@@ -618,8 +618,8 @@ const initApp = () => {
     const username = sessionStorage.getItem('auth_username');
 
     if (token && username) {
-      authContainer.classList.add('hide');
-      dashboardContainer.classList.remove('hide');
+      authContainer.style.display = 'none';
+      dashboardContainer.style.display = 'block';
       displayUsername.innerText = username;
       
       // Initialize view items
@@ -627,8 +627,8 @@ const initApp = () => {
       updateStats();
       showTab('tab-play');
     } else {
-      authContainer.classList.remove('hide');
-      dashboardContainer.classList.add('hide');
+      authContainer.style.display = 'block';
+      dashboardContainer.style.display = 'none';
       
       // If we log out, ensure game stops
       stopConfetti();
@@ -650,9 +650,9 @@ const initApp = () => {
     // Toggle tab panels
     document.querySelectorAll('.tab-panel').forEach(panel => {
       if (panel.id === tabId) {
-        panel.classList.add('active');
+        panel.style.display = 'block';
       } else {
-        panel.classList.remove('active');
+        panel.style.display = 'none';
       }
     });
 
@@ -766,7 +766,7 @@ const initApp = () => {
     const content = document.getElementById('game-insights-content');
     const chevron = document.getElementById('insights-chevron');
     
-    box.classList.remove('hide');
+    box.style.display = 'block';
     content.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
     content.innerText = "Analyzing match play... Aki is preparing the summary...";
@@ -796,7 +796,7 @@ const initApp = () => {
   const modalBody = document.getElementById('modal-insights-body');
 
   async function showModalInsights(gameObj) {
-    modalOverlay.classList.remove('hide');
+    modalOverlay.style.display = 'flex';
     modalBody.innerText = "Loading AI Match commentary...";
     
     try {
@@ -818,12 +818,12 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
   }
 
   document.getElementById('close-insights-modal-btn').addEventListener('click', () => {
-    modalOverlay.classList.add('hide');
+    modalOverlay.style.display = 'none';
   });
 
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) {
-      modalOverlay.classList.add('hide');
+      modalOverlay.style.display = 'none';
     }
   });
 
@@ -845,7 +845,7 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
     appendChatBubble('You', text, 'user-bubble');
 
     // Show loader
-    chatTypingIndicator.classList.remove('hide');
+    chatTypingIndicator.style.display = 'block';
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 
     try {
@@ -871,7 +871,7 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
     } catch (err) {
       appendChatBubble('SYSTEM ERROR', `Could not reach Aki's neurons: ${err.message}. Please check your API key in Settings.`, 'aki-bubble');
     } finally {
-      chatTypingIndicator.classList.add('hide');
+      chatTypingIndicator.style.display = 'none';
       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
   });
@@ -927,8 +927,8 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
 
     // Show loader and hide success
     expandForm.reset();
-    expandSuccessBox.classList.add('hide');
-    expandLoader.classList.remove('hide');
+    expandSuccessBox.style.display = 'none';
+    expandLoader.style.display = 'block';
 
     // Start loader title rotation
     let phraseIdx = 0;
@@ -945,10 +945,10 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
       });
 
       clearInterval(phraseInterval);
-      expandLoader.classList.add('hide');
+      expandLoader.style.display = 'none';
 
       // Show success
-      expandSuccessBox.classList.remove('hide');
+      expandSuccessBox.style.display = 'block';
       expandSuccessTitle.innerText = `Ingestion complete! "${res.entity.name}" is now playable in the ${category} database.`;
       
       // Render attributes chips
@@ -967,7 +967,7 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
       await syncDatasets();
     } catch (err) {
       clearInterval(phraseInterval);
-      expandLoader.classList.add('hide');
+      expandLoader.style.display = 'none';
       alert(`Expansion failed: ${err.message}. Enter a valid Gemini API Key in settings if not configured on the server.`);
       playSound('wrong');
     }
