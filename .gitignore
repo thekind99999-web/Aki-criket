@@ -1,0 +1,7 @@
+node_modules/
+.firebase/
+functions/node_modules/
+data/users.json
+data/games.json
+.env
+.env.local

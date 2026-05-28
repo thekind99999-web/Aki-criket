@@ -746,9 +746,16 @@ class GameState {
   }
 }
 
+function setDatasets(newDatasets) {
+  if (newDatasets.player) DATASETS.player = newDatasets.player;
+  if (newDatasets.team) DATASETS.team = newDatasets.team;
+  if (newDatasets.scenario) DATASETS.scenario = newDatasets.scenario;
+}
+
 // Export for usage
 window.AkiGame = {
   GameState,
   DATASETS,
-  QUESTIONS
+  QUESTIONS,
+  setDatasets
 };

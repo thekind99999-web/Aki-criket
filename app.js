@@ -1,4 +1,4 @@
-// Aki-Cricket Controller
+// Aki-Cricket Controller with Dashboard and Gemini Integrations
 
 const initApp = () => {
   let game = null;
@@ -6,10 +6,53 @@ const initApp = () => {
   let soundEnabled = true;
   let speechEnabled = false;
   let stadium3d = null;
+  let audioCtx = null;
+  
+  // AI Chat History
+  let chatHistory = [];
+
+  // Helper API fetch wrapper
+  async function apiFetch(url, options = {}) {
+    const token = sessionStorage.getItem('auth_token');
+    const headers = options.headers || {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Attach Gemini API key from local settings if available
+    const localApiKey = localStorage.getItem('gemini_api_key');
+    if (localApiKey) {
+      headers['x-gemini-api-key'] = localApiKey;
+    }
+    
+    headers['Content-Type'] = 'application/json';
+    
+    const res = await fetch(url, {
+      ...options,
+      headers
+    });
+    
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `Server returned error: ${res.status}`);
+    }
+    return res.json();
+  }
+
+  // Load and apply datasets from backend database
+  async function syncDatasets() {
+    try {
+      const datasets = await apiFetch('/api/dataset');
+      if (window.AkiGame && window.AkiGame.setDatasets) {
+        window.AkiGame.setDatasets(datasets);
+        console.log("Successfully synchronized dynamic datasets from backend!");
+      }
+    } catch (e) {
+      console.warn("Dynamic dataset sync failed, using static fallbacks:", e);
+    }
+  }
 
   // Audio Context for Sound Effects
-  let audioCtx = null;
-
   function initAudio() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -19,7 +62,7 @@ const initApp = () => {
     }
   }
 
-  // Play Sound Effects using Web Audio API
+  // Play Sound Effects
   function playSound(type) {
     if (!soundEnabled) return;
     try {
@@ -57,7 +100,6 @@ const initApp = () => {
         osc.start(now);
         osc.stop(now + 0.4);
       } else if (type === 'win') {
-        // Success Fanfare arpeggio
         const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
           const oscNode = audioCtx.createOscillator();
@@ -74,7 +116,6 @@ const initApp = () => {
           oscNode.stop(now + idx * 0.08 + 0.25);
         });
       } else if (type === 'lose') {
-        // Sad trombone sliding down
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(300, now);
         osc.frequency.linearRampToValueAtTime(100, now + 0.6);
@@ -83,7 +124,6 @@ const initApp = () => {
         osc.start(now);
         osc.stop(now + 0.6);
       } else if (type === 'wrong') {
-        // Buzz sound
         osc.type = 'square';
         osc.frequency.setValueAtTime(180, now);
         gain.gain.setValueAtTime(0.08, now);
@@ -143,14 +183,13 @@ const initApp = () => {
   };
 
   function getBanter(mood) {
-    const list = BANTER_LINES[mood];
+    const list = BANTER_LINES[mood] || BANTER_LINES.calm;
     return list[Math.floor(Math.random() * list.length)];
   }
 
-  // State Navigation
+  // State Navigation (for inner Play screen transitions)
   function showScreen(screenId) {
     if (screenId === "screen-guess") {
-      // Keep screen-game visible, overlay guess screen on top!
       document.getElementById("screen-guess").classList.add("active");
     } else {
       document.querySelectorAll(".screen").forEach(s => {
@@ -160,12 +199,16 @@ const initApp = () => {
       });
       document.getElementById("screen-guess").classList.remove("active");
       const target = document.getElementById(screenId);
-      target.classList.add("active");
+      if (target) target.classList.add("active");
     }
   }
 
   // Initialize Game Loop
   function startNewGame(category) {
+    // Hide previous analysis
+    document.getElementById('game-ai-insights-box').classList.add('hide');
+    document.getElementById('game-insights-content').innerText = '';
+
     game = new window.AkiGame.GameState(category);
     currentQuestion = null;
 
@@ -179,7 +222,6 @@ const initApp = () => {
       });
     }
 
-    // Load first question
     askNext();
     showScreen("screen-game");
   }
@@ -189,14 +231,12 @@ const initApp = () => {
     currentQuestion = game.getNextQuestion();
 
     if (!currentQuestion) {
-      // Out of questions - force final guess
       triggerGuessOrEnd();
       return;
     }
 
     const report = game.getEngineReport();
 
-    // Update 3D state
     if (stadium3d) {
       stadium3d.updateState(report.uiState);
     }
@@ -225,16 +265,13 @@ const initApp = () => {
       badge.style.background = `rgba(var(--color-${mood}-glow), 0.15)`;
     }
 
-    // Question
     document.getElementById("question-text").innerText = currentQuestion.text;
 
-    // Banter
     const banter = getBanter(mood);
     document.getElementById("banter-text").innerText = `"${banter}"`;
     speak(banter + " " + currentQuestion.text);
   }
 
-  // Handle answers with thinking pacing delay
   const THINKING_PHRASES = [
     "Hmm...",
     "Let me check my database...",
@@ -253,17 +290,12 @@ const initApp = () => {
       const answerVal = btn.getAttribute("data-val");
       playSound('click');
 
-      // Submit to engine
       game.submitAnswer(currentQuestion.id, answerVal);
-
-      // Disable buttons
       setAnswerButtonsEnabled(false);
       
-      // Update banter text to show thinking phrase
       const randomThinking = THINKING_PHRASES[Math.floor(Math.random() * THINKING_PHRASES.length)];
       document.getElementById("banter-text").innerText = `"${randomThinking}"`;
 
-      // Delay evaluating next action to simulate AI thinking
       setTimeout(() => {
         setAnswerButtonsEnabled(true);
         const report = game.getEngineReport();
@@ -282,7 +314,6 @@ const initApp = () => {
     const report = game.getEngineReport();
     
     if (report.confidence >= 0.70 || game.totalQuestionsAsked >= 15) {
-      // Propose final guess
       playSound('guess');
       
       let catLabel = "IPL Player";
@@ -294,8 +325,7 @@ const initApp = () => {
       
       showScreen("screen-guess");
     } else {
-      // Lost completely
-      showResult(false, "Unknown Player/Team");
+      showResult(false, "Unknown Entity");
     }
   }
 
@@ -304,7 +334,6 @@ const initApp = () => {
     playSound('win');
     const report = game.getEngineReport();
     
-    // Trigger 3D six celebration
     if (stadium3d) {
       stadium3d.updateState({
         batsmanAnimationTrigger: "MASSIVE_SIX_CELEBRATION",
@@ -313,7 +342,6 @@ const initApp = () => {
       });
     }
 
-    // Trigger flying "6" overlay
     const flyingSix = document.getElementById("flying-six-overlay");
     if (flyingSix) {
       flyingSix.classList.add("active");
@@ -322,7 +350,6 @@ const initApp = () => {
       }, 1800);
     }
 
-    // Delay result screen transition to let the animation play!
     setTimeout(() => {
       showResult(true, report.topCandidate);
     }, 1800);
@@ -332,24 +359,20 @@ const initApp = () => {
   document.getElementById("reject-guess-btn").addEventListener("click", () => {
     playSound('wrong');
     const report = game.getEngineReport();
-    
-    // Tell engine guess was rejected
     game.rejectGuess(report.topCandidate);
 
     const updatedReport = game.getEngineReport();
 
-    // If reached 15 questions or we have no more viable candidates, Aki loses
     if (game.totalQuestionsAsked >= 15 || updatedReport.confidence < 0.01) {
       showResult(false, report.topCandidate);
     } else {
-      // Otherwise, go back to game, and ask next question
       showScreen("screen-game");
       askNext();
     }
   });
 
-  // Show Results Screen
-  function showResult(akiWon, targetEntity) {
+  // Show Results Screen & Save Game to Backend
+  async function showResult(akiWon, targetEntity) {
     const report = game ? game.getEngineReport() : { totalQuestions: 15 };
     const title = document.getElementById("result-title");
     const subtitle = document.getElementById("result-subtitle");
@@ -371,7 +394,6 @@ const initApp = () => {
       subtitle.innerText = "Your mind is an open book to my algorithms.";
       rIcon.innerHTML = `<i class="fas fa-medal" style="color: var(--color-calm);"></i>`;
       
-      // Start confetti celebration
       startConfetti();
       speak("Aha! Victory is mine! My database registers another win.");
     } else {
@@ -385,6 +407,25 @@ const initApp = () => {
     }
 
     showScreen("screen-result");
+
+    // SAVE GAME TO BACKEND
+    try {
+      await apiFetch('/api/games', {
+        method: 'POST',
+        body: JSON.stringify({
+          gameType: game.gameType,
+          targetEntity: targetEntity || "Unknown",
+          questionsCount: report.totalQuestions,
+          akiWon: akiWon,
+          mood: finalMood
+        })
+      });
+      console.log("Match record logged to server successfully.");
+      // Proactively refresh profile stats
+      updateStats();
+    } catch (e) {
+      console.error("Failed to log game to server:", e);
+    }
   }
 
   // Play Again logic
@@ -443,7 +484,6 @@ const initApp = () => {
       this.x += Math.sin(this.tiltAngle);
       this.tilt = Math.sin(this.tiltAngle - this.r/2) * 15;
 
-      // Reset piece at bottom
       if (this.y > canvas.height) {
         this.x = Math.random() * canvas.width;
         this.y = -20;
@@ -487,7 +527,6 @@ const initApp = () => {
     stadium3d = null;
   }
 
-  // Hover play sounds for navigation buttons
   document.querySelectorAll("button").forEach(btn => {
     btn.addEventListener("mouseenter", () => {
       playSound('hover');
@@ -501,6 +540,481 @@ const initApp = () => {
       btn.style.pointerEvents = enabled ? "auto" : "none";
     });
   }
+
+  // ==================== AUTHENTICATION LOGIC ====================
+  let isSignupMode = false;
+
+  const authContainer = document.getElementById('auth-container');
+  const dashboardContainer = document.getElementById('dashboard-container');
+  const authForm = document.getElementById('auth-form');
+  const authSubmitText = document.getElementById('auth-submit-text');
+  const authErrorMsg = document.getElementById('auth-error-msg');
+  const displayUsername = document.getElementById('display-username');
+
+  // Toggle Auth Modes
+  document.getElementById('tab-login-btn').addEventListener('click', () => {
+    isSignupMode = false;
+    document.getElementById('tab-login-btn').classList.add('active');
+    document.getElementById('tab-signup-btn').classList.remove('active');
+    authSubmitText.innerText = "Log In";
+    authErrorMsg.classList.add('hide');
+  });
+
+  document.getElementById('tab-signup-btn').addEventListener('click', () => {
+    isSignupMode = true;
+    document.getElementById('tab-login-btn').classList.remove('active');
+    document.getElementById('tab-signup-btn').classList.add('active');
+    authSubmitText.innerText = "Register & Log In";
+    authErrorMsg.classList.add('hide');
+  });
+
+  // Auth Form Submit
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    authErrorMsg.classList.add('hide');
+
+    const username = document.getElementById('auth-username').value.trim();
+    const password = document.getElementById('auth-password').value;
+
+    const endpoint = isSignupMode ? '/api/register' : '/api/login';
+
+    try {
+      const data = await apiFetch(endpoint, {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+      });
+
+      // Save token & username
+      sessionStorage.setItem('auth_token', data.token);
+      sessionStorage.setItem('auth_username', data.username);
+      
+      authForm.reset();
+      checkAuth();
+      playSound('click');
+    } catch (err) {
+      authErrorMsg.innerText = err.message || "Authentication failed.";
+      authErrorMsg.classList.remove('hide');
+      playSound('wrong');
+    }
+  });
+
+  // Log Out Account
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+      await apiFetch('/api/logout', { method: 'POST' });
+    } catch (e) {
+      console.warn("Backend logout request failed:", e);
+    }
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_username');
+    chatHistory = [];
+    checkAuth();
+    playSound('click');
+  });
+
+  // Check auth state on load
+  function checkAuth() {
+    const token = sessionStorage.getItem('auth_token');
+    const username = sessionStorage.getItem('auth_username');
+
+    if (token && username) {
+      authContainer.classList.add('hide');
+      dashboardContainer.classList.remove('hide');
+      displayUsername.innerText = username;
+      
+      // Initialize view items
+      syncDatasets();
+      updateStats();
+      showTab('tab-play');
+    } else {
+      authContainer.classList.remove('hide');
+      dashboardContainer.classList.add('hide');
+      
+      // If we log out, ensure game stops
+      stopConfetti();
+      showScreen('screen-welcome');
+    }
+  }
+
+  // ==================== DASHBOARD TAB ROUTING ====================
+  function showTab(tabId) {
+    // Toggle tab button active classes
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      if (tab.getAttribute('data-target') === tabId) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Toggle tab panels
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+      if (panel.id === tabId) {
+        panel.classList.add('active');
+      } else {
+        panel.classList.remove('active');
+      }
+    });
+
+    // Trigger tab specific loads
+    if (tabId === 'tab-stats') {
+      updateStats();
+    } else if (tabId === 'tab-play') {
+      // Small resize trigger to fix Three.js rendering viewport sizing issues if tab was hidden
+      if (stadium3d) {
+        setTimeout(() => stadium3d.onResize(), 100);
+      }
+    }
+  }
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      playSound('click');
+      const target = tab.getAttribute('data-target');
+      showTab(target);
+    });
+  });
+
+  // ==================== STATS & HISTORY TAB LOGIC ====================
+  async function updateStats() {
+    try {
+      const data = await apiFetch('/api/profile');
+      
+      document.getElementById('stat-games-played').innerText = data.stats.gamesPlayed;
+      document.getElementById('stat-wins').innerText = data.stats.wins;
+      document.getElementById('stat-losses').innerText = data.stats.losses;
+      document.getElementById('stat-win-rate').innerText = `${data.stats.winRate}%`;
+      document.getElementById('stat-streak').innerText = data.stats.currentStreak;
+      
+      // Category Breakdown Bars
+      const total = data.stats.gamesPlayed || 1;
+      const pPct = Math.round((data.stats.categories.player / total) * 100);
+      const tPct = Math.round((data.stats.categories.team / total) * 100);
+      const sPct = Math.round((data.stats.categories.scenario / total) * 100);
+      
+      document.getElementById('bar-players').style.width = `${pPct}%`;
+      document.getElementById('val-players').innerText = data.stats.categories.player;
+      
+      document.getElementById('bar-teams').style.width = `${tPct}%`;
+      document.getElementById('val-teams').innerText = data.stats.categories.team;
+      
+      document.getElementById('bar-scenarios').style.width = `${sPct}%`;
+      document.getElementById('val-scenarios').innerText = data.stats.categories.scenario;
+      
+      // History table
+      const tbody = document.getElementById('history-table-body');
+      if (data.history.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #747d8c;">No games played yet. Challenge Aki!</td></tr>`;
+      } else {
+        tbody.innerHTML = data.history.map(g => {
+          const dateStr = new Date(g.timestamp).toLocaleDateString(undefined, {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          const catLabel = g.gameType.toUpperCase();
+          const badgeClass = g.result === 'Win' ? 'badge-win' : 'badge-loss';
+          const outcomeLabel = g.result === 'Win' ? 'Win' : 'Loss';
+          
+          return `
+            <tr>
+              <td>${dateStr}</td>
+              <td><span class="highlight">${catLabel}</span></td>
+              <td>${g.targetEntity}</td>
+              <td>${g.questionsCount}</td>
+              <td><span class="${badgeClass}">${outcomeLabel}</span></td>
+              <td>
+                <button class="insight-btn" data-game-id="${g.id}"><i class="fas fa-brain"></i> Review</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+        tbody.querySelectorAll('.insight-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const gameId = btn.getAttribute('data-game-id');
+            const targetGame = data.history.find(g => g.id === gameId);
+            if (targetGame) {
+              showModalInsights(targetGame);
+            }
+          });
+        });
+      }
+    } catch (e) {
+      console.error("Failed to fetch profile stats:", e);
+    }
+  }
+
+  // ==================== AI INSIGHTS & COMMENTARY REVIEW ====================
+  
+  // 1. Result screen Live Match Analysis Accordion Toggle
+  document.getElementById('trigger-insights-toggle').addEventListener('click', () => {
+    const body = document.getElementById('game-insights-content');
+    const chevron = document.getElementById('insights-chevron');
+    if (body.style.display === 'none') {
+      body.style.display = 'block';
+      chevron.style.transform = 'rotate(180deg)';
+    } else {
+      body.style.display = 'none';
+      chevron.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // Request analysis of the active game
+  document.getElementById('request-ai-analysis-btn').addEventListener('click', async () => {
+    if (!game) return;
+    
+    const box = document.getElementById('game-ai-insights-box');
+    const content = document.getElementById('game-insights-content');
+    const chevron = document.getElementById('insights-chevron');
+    
+    box.classList.remove('hide');
+    content.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+    content.innerText = "Analyzing match play... Aki is preparing the summary...";
+    
+    try {
+      const report = game.getEngineReport();
+      const payload = {
+        gameHistory: game.history,
+        targetEntity: report.topCandidate,
+        gameType: game.gameType,
+        akiWon: report.isFinalGuess && report.confidence >= 0.70
+      };
+      
+      const res = await apiFetch('/api/gemini/analyze', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      content.innerHTML = res.analysis.replace(/\n/g, '<br>');
+    } catch (e) {
+      content.innerText = `AI Review failed: ${e.message}. Enter a Gemini API Key in Settings if not set on the server.`;
+    }
+  });
+
+  // 2. Modal-based review for past games
+  const modalOverlay = document.getElementById('insights-modal');
+  const modalBody = document.getElementById('modal-insights-body');
+
+  async function showModalInsights(gameObj) {
+    modalOverlay.classList.remove('hide');
+    modalBody.innerText = "Loading AI Match commentary...";
+    
+    try {
+      const prompt = `Write a short, engaging 2-paragraph cricket commentator highlight report about:
+Category: ${gameObj.gameType}
+Target Entity: ${gameObj.targetEntity}
+Duel Outcome: The AI (Aki-Cricket) played a duel with the user and the user outcome was a ${gameObj.result} in ${gameObj.questionsCount} questions.
+Describe the significance of the entity in IPL history and wrap it in fun sports commentator banter.`;
+
+      const res = await apiFetch('/api/gemini/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message: prompt })
+      });
+      
+      modalBody.innerHTML = res.reply.replace(/\n/g, '<br>');
+    } catch (e) {
+      modalBody.innerText = `Failed to generate match insights: ${e.message}. Please configure your Gemini API Key in the Settings tab.`;
+    }
+  }
+
+  document.getElementById('close-insights-modal-btn').addEventListener('click', () => {
+    modalOverlay.classList.add('hide');
+  });
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.add('hide');
+    }
+  });
+
+  // ==================== AI CHAT HUB LOGIC ====================
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatMessagesContainer = document.getElementById('chat-messages-container');
+  const chatTypingIndicator = document.getElementById('chat-typing-indicator');
+
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatInput.value = '';
+    playSound('click');
+
+    // Add user bubble
+    appendChatBubble('You', text, 'user-bubble');
+
+    // Show loader
+    chatTypingIndicator.classList.remove('hide');
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+    try {
+      const res = await apiFetch('/api/gemini/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          message: text,
+          history: chatHistory
+        })
+      });
+
+      // Add Aki bubble
+      appendChatBubble('AKI-CRICKET', res.reply, 'aki-bubble');
+      
+      // Update memory history
+      chatHistory.push({ role: 'user', text });
+      chatHistory.push({ role: 'model', text: res.reply });
+      
+      // Limit local chat memory length
+      if (chatHistory.length > 20) {
+        chatHistory = chatHistory.slice(-20);
+      }
+    } catch (err) {
+      appendChatBubble('SYSTEM ERROR', `Could not reach Aki's neurons: ${err.message}. Please check your API key in Settings.`, 'aki-bubble');
+    } finally {
+      chatTypingIndicator.classList.add('hide');
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+  });
+
+  function appendChatBubble(sender, text, cssClass) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${cssClass}`;
+    
+    const senderDiv = document.createElement('div');
+    senderDiv.className = 'bubble-sender';
+    senderDiv.innerText = `${sender.toUpperCase()}:`;
+    
+    const textDiv = document.createElement('div');
+    textDiv.className = 'bubble-text';
+    textDiv.innerHTML = text.replace(/\n/g, '<br>');
+    
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'bubble-time';
+    timeDiv.innerText = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    
+    bubble.appendChild(senderDiv);
+    bubble.appendChild(textDiv);
+    bubble.appendChild(timeDiv);
+    
+    chatMessagesContainer.appendChild(bubble);
+  }
+
+  // ==================== AI EXPANSION LAB LOGIC ====================
+  const expandForm = document.getElementById('expand-db-form');
+  const expandLoader = document.getElementById('expand-loader');
+  const expandLoaderTitle = document.getElementById('expand-loader-title');
+  const expandSuccessBox = document.getElementById('expand-success-box');
+  const expandSuccessTitle = document.getElementById('expand-success-title');
+  const attributeReviewGrid = document.getElementById('attribute-review-grid');
+
+  const loaderPhrases = [
+    "Consulting Cricket Records...",
+    "Extracting match databases...",
+    "Compiling player vectors...",
+    "Validating batting milestones...",
+    "Calibrating Aki's Bayesian Matrix...",
+    "Injecting attributes into memory gates..."
+  ];
+
+  expandForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const entityName = document.getElementById('expand-name').value.trim();
+    const category = document.getElementById('expand-category').value;
+    
+    if (!entityName) return;
+
+    playSound('click');
+
+    // Show loader and hide success
+    expandForm.reset();
+    expandSuccessBox.classList.add('hide');
+    expandLoader.classList.remove('hide');
+
+    // Start loader title rotation
+    let phraseIdx = 0;
+    expandLoaderTitle.innerText = loaderPhrases[phraseIdx];
+    const phraseInterval = setInterval(() => {
+      phraseIdx = (phraseIdx + 1) % loaderPhrases.length;
+      expandLoaderTitle.innerText = loaderPhrases[phraseIdx];
+    }, 1800);
+
+    try {
+      const res = await apiFetch('/api/gemini/expand', {
+        method: 'POST',
+        body: JSON.stringify({ entityName, category })
+      });
+
+      clearInterval(phraseInterval);
+      expandLoader.classList.add('hide');
+
+      // Show success
+      expandSuccessBox.classList.remove('hide');
+      expandSuccessTitle.innerText = `Ingestion complete! "${res.entity.name}" is now playable in the ${category} database.`;
+      
+      // Render attributes chips
+      attributeReviewGrid.innerHTML = Object.keys(res.entity.attributes).map(key => {
+        const val = res.entity.attributes[key];
+        const valClass = val ? 'true' : 'false';
+        return `
+          <div class="attr-chip ${valClass}">
+            <span>${key}</span>
+            <span>${val ? 'YES' : 'NO'}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Reload dataset to update game Engine!
+      await syncDatasets();
+    } catch (err) {
+      clearInterval(phraseInterval);
+      expandLoader.classList.add('hide');
+      alert(`Expansion failed: ${err.message}. Enter a valid Gemini API Key in settings if not configured on the server.`);
+      playSound('wrong');
+    }
+  });
+
+  // ==================== SETTINGS OPTIONS LOGIC ====================
+  const settingsKeyInput = document.getElementById('settings-api-key');
+  const toggleKeyBtn = document.getElementById('toggle-key-visibility');
+  const soundToggle = document.getElementById('settings-sound-toggle');
+  const speechToggle = document.getElementById('settings-speech-toggle');
+
+  // Load Settings
+  const localKey = localStorage.getItem('gemini_api_key') || '';
+  settingsKeyInput.value = localKey;
+  
+  soundToggle.checked = soundEnabled;
+  speechToggle.checked = speechEnabled;
+
+  // Toggle key input visibility
+  toggleKeyBtn.addEventListener('click', () => {
+    if (settingsKeyInput.type === 'password') {
+      settingsKeyInput.type = 'text';
+      toggleKeyBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+      settingsKeyInput.type = 'password';
+      toggleKeyBtn.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+  });
+
+  // Save Settings
+  document.getElementById('save-settings-btn').addEventListener('click', () => {
+    playSound('click');
+    const key = settingsKeyInput.value.trim();
+    if (key) {
+      localStorage.setItem('gemini_api_key', key);
+    } else {
+      localStorage.removeItem('gemini_api_key');
+    }
+
+    soundEnabled = soundToggle.checked;
+    speechEnabled = speechToggle.checked;
+
+    alert("Dashboard settings updated successfully!");
+  });
+
+  // Initialize page on load
+  checkAuth();
 };
 
 if (document.readyState === "loading") {

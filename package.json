@@ -4,7 +4,11 @@
   "description": "Aki-Cricket Sentient IPL Guessing Game Prototype",
   "scripts": {
     "start": "node server.js",
-    "dev": "npx http-server -p 8080"
+    "dev": "node server.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.19.2",
+    "firebase-admin": "^13.10.0",
+    "firebase-functions": "^7.2.5"
+  }
 }

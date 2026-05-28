@@ -1,0 +1,454 @@
+{
+  "player": [
+    {
+      "name": "MS Dhoni",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": true, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Virat Kohli",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": false, "orangeCap": true, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Rohit Sharma",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "AB de Villiers",
+      "attributes": {
+        "active": false, "overseas": true, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": false, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "Chris Gayle",
+      "attributes": {
+        "active": false, "overseas": true, "batsman": true, "bowler": false, "allrounder": true,
+        "captain": false, "trophy": false, "orangeCap": true, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": true, "kkr": true, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Sunil Narine",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": true, "leftHanded": true,
+        "century": true, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Rashid Khan",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Jasprit Bumrah",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": true, "allrounder": false,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Lasith Malinga",
+      "attributes": {
+        "active": false, "overseas": true, "batsman": false, "bowler": true, "allrounder": false,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": true, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Hardik Pandya",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Gautam Gambhir",
+      "attributes": {
+        "active": false, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": true, "leftHanded": true,
+        "century": false, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Suresh Raina",
+      "attributes": {
+        "active": false, "overseas": false, "batsman": true, "bowler": false, "allrounder": true,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": true, "mi": false, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Ravindra Jadeja",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": true, "mi": false, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Glenn Maxwell",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "Jos Buttler",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": false, "trophy": true, "orangeCap": true, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Andre Russell",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": false, "rcb": false, "kkr": true, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "David Warner",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": true, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "KL Rahul",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": false, "orangeCap": true, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Shikhar Dhawan",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Shubman Gill",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": true, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": true, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Yuzvendra Chahal",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": true, "allrounder": false,
+        "captain": false, "trophy": false, "orangeCap": false, "purpleCap": true, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Bhuvneshwar Kumar",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": true, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": true, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Dinesh Karthik",
+      "attributes": {
+        "active": false, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": true, "kkr": true, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Shane Watson",
+      "attributes": {
+        "active": false, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": true, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": true, "csk": true, "mi": false, "rcb": true, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "Amit Mishra",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": false, "bowler": true, "allrounder": false,
+        "captain": false, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": true,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": true, "hemisphere": false
+      }
+    },
+    {
+      "name": "Rishabh Pant",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Sanju Samson",
+      "attributes": {
+        "active": true, "overseas": false, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": true, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": false
+      }
+    },
+    {
+      "name": "Marcus Stoinis",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": false, "bowler": false, "allrounder": true,
+        "captain": false, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": true, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": true, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "Heinrich Klaasen",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": false, "trophy": false, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": false, "rcb": false, "kkr": false, "leftHanded": false,
+        "century": false, "fiveWickets": false, "hemisphere": true
+      }
+    },
+    {
+      "name": "Quinton de Kock",
+      "attributes": {
+        "active": true, "overseas": true, "batsman": true, "bowler": false, "allrounder": false,
+        "captain": false, "trophy": true, "orangeCap": false, "purpleCap": false, "spinner": false,
+        "fastBowler": false, "csk": false, "mi": true, "rcb": false, "kkr": false, "leftHanded": true,
+        "century": true, "fiveWickets": false, "hemisphere": true
+      }
+    }
+  ],
+  "team": [
+    {
+      "name": "Chennai Super Kings (CSK)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": true, "blueJersey": false, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": true, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": true
+      }
+    },
+    {
+      "name": "Mumbai Indians (MI)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": true, "blueJersey": true, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": true,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Royal Challengers Bengaluru (RCB)",
+      "attributes": {
+        "active": true, "wonTrophy": false, "multipleTrophies": false, "blueJersey": false, "redJersey": true,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": true, "captainedByRohit": false,
+        "playInSouth": true
+      }
+    },
+    {
+      "name": "Kolkata Knight Riders (KKR)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": true, "blueJersey": false, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Rajasthan Royals (RR)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": false, "blueJersey": false, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Sunrisers Hyderabad (SRH)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": false, "blueJersey": false, "redJersey": false,
+        "founded2008": false, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": true
+      }
+    },
+    {
+      "name": "Delhi Capitals (DC)",
+      "attributes": {
+        "active": true, "wonTrophy": false, "multipleTrophies": false, "blueJersey": true, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Punjab Kings (PBKS)",
+      "attributes": {
+        "active": true, "wonTrophy": false, "multipleTrophies": false, "blueJersey": false, "redJersey": true,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Gujarat Titans (GT)",
+      "attributes": {
+        "active": true, "wonTrophy": true, "multipleTrophies": false, "blueJersey": true, "redJersey": false,
+        "founded2008": false, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Lucknow Super Giants (LSG)",
+      "attributes": {
+        "active": true, "wonTrophy": false, "multipleTrophies": false, "blueJersey": true, "redJersey": false,
+        "founded2008": false, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    },
+    {
+      "name": "Deccan Chargers",
+      "attributes": {
+        "active": false, "wonTrophy": true, "multipleTrophies": false, "blueJersey": true, "redJersey": false,
+        "founded2008": true, "captainedByDhoni": false, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": true
+      }
+    },
+    {
+      "name": "Rising Pune Supergiant",
+      "attributes": {
+        "active": false, "wonTrophy": false, "multipleTrophies": false, "blueJersey": true, "redJersey": false,
+        "founded2008": false, "captainedByDhoni": true, "captainedByKohli": false, "captainedByRohit": false,
+        "playInSouth": false
+      }
+    }
+  ],
+  "scenario": [
+    {
+      "name": "Rinku Singh's 5 Sixes in 5 Balls (KKR vs GT, 2023)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": true, "involvedCSK": false, "involvedMI": false,
+        "involvedRCB": false, "individualRecord": true, "battingFeat": true, "bowlingFeat": false,
+        "occurredInFirstDecade": false, "occurredPost2020": true, "wonByChasing": true, "superOver": false
+      }
+    },
+    {
+      "name": "MI winning by 1 run against RPS (2017 Final)",
+      "attributes": {
+        "occurredInFinal": true, "lastBallFinish": true, "involvedCSK": false, "involvedMI": true,
+        "involvedRCB": false, "individualRecord": false, "battingFeat": false, "bowlingFeat": false,
+        "occurredInFirstDecade": true, "occurredPost2020": false, "wonByChasing": false, "superOver": false
+      }
+    },
+    {
+      "name": "MI winning by 1 run against CSK (2019 Final)",
+      "attributes": {
+        "occurredInFinal": true, "lastBallFinish": true, "involvedCSK": true, "involvedMI": true,
+        "involvedRCB": false, "individualRecord": false, "battingFeat": false, "bowlingFeat": false,
+        "occurredInFirstDecade": false, "occurredPost2020": false, "wonByChasing": false, "superOver": false
+      }
+    },
+    {
+      "name": "CSK winning on the last ball of 2023 Final (Jadeja's 6 and 4)",
+      "attributes": {
+        "occurredInFinal": true, "lastBallFinish": true, "involvedCSK": true, "involvedMI": false,
+        "involvedRCB": false, "individualRecord": false, "battingFeat": true, "bowlingFeat": false,
+        "occurredInFirstDecade": false, "occurredPost2020": true, "wonByChasing": true, "superOver": false
+      }
+    },
+    {
+      "name": "Chris Gayle's 175* against PWI (2013)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": false, "involvedCSK": false, "involvedMI": false,
+        "involvedRCB": true, "individualRecord": true, "battingFeat": true, "bowlingFeat": false,
+        "occurredInFirstDecade": true, "occurredPost2020": false, "wonByChasing": false, "superOver": false
+      }
+    },
+    {
+      "name": "Brendon McCullum's 158* in the first-ever IPL match (2008)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": false, "involvedCSK": false, "involvedMI": false,
+        "involvedRCB": true, "individualRecord": true, "battingFeat": true, "bowlingFeat": false,
+        "occurredInFirstDecade": true, "occurredPost2020": false, "wonByChasing": false, "superOver": false
+      }
+    },
+    {
+      "name": "Yuvraj Singh's hat-trick and 50 in the same match (2009)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": false, "involvedCSK": false, "involvedMI": false,
+        "involvedRCB": true, "individualRecord": true, "battingFeat": true, "bowlingFeat": true,
+        "occurredInFirstDecade": true, "occurredPost2020": false, "wonByChasing": true, "superOver": false
+      }
+    },
+    {
+      "name": "MI vs PBKS Double Super Over (2020)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": true, "involvedCSK": false, "involvedMI": true,
+        "involvedRCB": false, "individualRecord": false, "battingFeat": false, "bowlingFeat": false,
+        "occurredInFirstDecade": false, "occurredPost2020": true, "wonByChasing": true, "superOver": true
+      }
+    },
+    {
+      "name": "Alzarri Joseph's 6 wickets for 12 runs on debut (2019)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": false, "involvedCSK": false, "involvedMI": true,
+        "involvedRCB": false, "individualRecord": true, "battingFeat": false, "bowlingFeat": true,
+        "occurredInFirstDecade": false, "occurredPost2020": false, "wonByChasing": false, "superOver": false
+      }
+    },
+    {
+      "name": "Dhoni hitting 23 runs in the final over against Axar Patel (2016)",
+      "attributes": {
+        "occurredInFinal": false, "lastBallFinish": true, "involvedCSK": false, "involvedMI": false,
+        "involvedRCB": false, "individualRecord": true, "battingFeat": true, "bowlingFeat": false,
+        "occurredInFirstDecade": true, "occurredPost2020": false, "wonByChasing": true, "superOver": false
+      }
+    }
+  ]
+}
