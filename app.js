@@ -11,8 +11,390 @@ const initApp = () => {
   // AI Chat History
   let chatHistory = [];
 
+  let useLocalFallback = false;
+
+  async function detectBackend() {
+    try {
+      const res = await fetch('/api/dataset', { method: 'GET' });
+      if (res.status === 404 || !res.ok) {
+        useLocalFallback = true;
+        console.warn("Backend API unavailable (HTTP 404 or error). Falling back to client-side database mode.");
+      } else {
+        useLocalFallback = false;
+        console.log("Backend API is fully available. Running in full-stack mode.");
+      }
+    } catch (e) {
+      useLocalFallback = true;
+      console.warn("Backend API unreachable. Falling back to client-side database mode:", e);
+    }
+  }
+
+  async function callGeminiDirect(apiKey, prompt, systemInstruction = null, isJson = false) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const body = {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+    };
+    if (systemInstruction) {
+      body.systemInstruction = {
+        parts: [{ text: systemInstruction }]
+      };
+    }
+    if (isJson) {
+      body.generationConfig = {
+        responseMimeType: "application/json"
+      };
+    }
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    
+    if (!response.ok) {
+      const errText = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try {
+        const parsed = JSON.parse(errText);
+        msg = parsed.error?.message || msg;
+      } catch(e) {}
+      throw new Error(msg);
+    }
+    
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      throw new Error("Empty response from Gemini API");
+    }
+    return text;
+  }
+
+  async function callGeminiChatDirect(apiKey, message, history) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const formattedHistory = (history || []).map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    }));
+    
+    const body = {
+      contents: [...formattedHistory, { role: 'user', parts: [{ text: message }] }],
+      systemInstruction: {
+        parts: [{ text: "You are Aki-Cricket, the sentient IPL sports mind. You are commentating on cricket, answering trivia, and engaging in friendly banter. You are slightly cocky but very knowledgeable about IPL records, stats, players, and match scenarios. Keep your responses engaging, under 3 paragraphs, and use cricket metaphors (like boundaries, wickets, googlies, clean bowled) where appropriate. Be conversational, direct, and fun." }]
+      }
+    };
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    
+    if (!response.ok) {
+      const errText = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try {
+        const parsed = JSON.parse(errText);
+        msg = parsed.error?.message || msg;
+      } catch(e) {}
+      throw new Error(msg);
+    }
+    
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "My processors are momentarily jammed. Throw me another ball!";
+    return { reply };
+  }
+
+  async function handleOfflineRequest(url, options = {}) {
+    const payload = options.body ? JSON.parse(options.body) : null;
+    const localApiKey = localStorage.getItem('gemini_api_key');
+    
+    async function offlineHash(password) {
+      const msgBuffer = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
+    function getOfflineUsers() {
+      try {
+        return JSON.parse(localStorage.getItem('offline_users') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+    
+    function saveOfflineUsers(users) {
+      localStorage.setItem('offline_users', JSON.stringify(users));
+    }
+
+    function getOfflineGames() {
+      try {
+        return JSON.parse(localStorage.getItem('offline_games') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveOfflineGames(games) {
+      localStorage.setItem('offline_games', JSON.stringify(games));
+    }
+    
+    if (url === '/api/register') {
+      const { username, password } = payload;
+      if (!username || !password) {
+        throw new Error('Username and password are required');
+      }
+      const users = getOfflineUsers();
+      if (users[username]) {
+        throw new Error('Username is already taken');
+      }
+      const hashedPassword = await offlineHash(password);
+      users[username] = {
+        username,
+        password: hashedPassword,
+        wins: 0,
+        losses: 0,
+        gamesPlayed: 0
+      };
+      saveOfflineUsers(users);
+      return { message: 'Registration successful', token: 'mock-offline-token-' + username, username };
+    }
+    
+    if (url === '/api/login') {
+      const { username, password } = payload;
+      if (!username || !password) {
+        throw new Error('Username and password are required');
+      }
+      const users = getOfflineUsers();
+      const user = users[username];
+      const hashedPassword = await offlineHash(password);
+      if (!user || user.password !== hashedPassword) {
+        throw new Error('Invalid username or password');
+      }
+      return { message: 'Login successful', token: 'mock-offline-token-' + username, username };
+    }
+    
+    if (url === '/api/logout') {
+      return { message: 'Logged out successfully' };
+    }
+    
+    if (url === '/api/profile') {
+      const username = sessionStorage.getItem('auth_username');
+      if (!username) throw new Error('Unauthorized');
+      
+      const games = getOfflineGames().filter(g => g.username === username);
+      const total = games.length;
+      const wins = games.filter(g => g.result === 'Win' || g.akiWon === false).length;
+      const losses = total - wins;
+      const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+      
+      let currentStreak = 0;
+      for (let i = 0; i < games.length; i++) {
+        if (games[i].result === 'Win') {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+      
+      const categories = { player: 0, team: 0, scenario: 0 };
+      games.forEach(g => {
+        if (categories[g.gameType] !== undefined) {
+          categories[g.gameType]++;
+        }
+      });
+      
+      return {
+        username,
+        stats: {
+          gamesPlayed: total,
+          wins,
+          losses,
+          winRate,
+          currentStreak,
+          categories
+        },
+        history: games.slice(0, 15)
+      };
+    }
+    
+    if (url === '/api/games') {
+      const username = sessionStorage.getItem('auth_username');
+      if (!username) throw new Error('Unauthorized');
+      
+      const { gameType, targetEntity, questionsCount, akiWon, mood } = payload;
+      const result = akiWon ? 'Loss' : 'Win';
+      
+      const newGame = {
+        id: 'offline-game-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        username,
+        gameType,
+        targetEntity,
+        questionsCount,
+        akiWon,
+        result,
+        mood,
+        timestamp: new Date().toISOString()
+      };
+      
+      const games = getOfflineGames();
+      games.unshift(newGame);
+      saveOfflineGames(games);
+      
+      const users = getOfflineUsers();
+      if (users[username]) {
+        users[username].gamesPlayed++;
+        if (result === 'Win') {
+          users[username].wins++;
+        } else {
+          users[username].losses++;
+        }
+        saveOfflineUsers(users);
+      }
+      
+      return { message: 'Game stats saved', game: newGame };
+    }
+    
+    if (url === '/api/dataset') {
+      const datasets = JSON.parse(JSON.stringify(window.AkiGame.DATASETS));
+      try {
+        const offlineDatasets = JSON.parse(localStorage.getItem('offline_datasets') || '{"player":[],"team":[],"scenario":[]}');
+        Object.keys(offlineDatasets).forEach(cat => {
+          if (Array.isArray(offlineDatasets[cat])) {
+            offlineDatasets[cat].forEach(entity => {
+              if (!datasets[cat].find(e => e.name.toLowerCase() === entity.name.toLowerCase())) {
+                datasets[cat].push(entity);
+              }
+            });
+          }
+        });
+      } catch (e) {
+        console.warn("Failed to merge offline datasets:", e);
+      }
+      return datasets;
+    }
+    
+    if (url === '/api/gemini/chat') {
+      if (!localApiKey) {
+        throw new Error('Gemini API Key is required. Please set it in Settings tab.');
+      }
+      const { message, history } = payload;
+      return callGeminiChatDirect(localApiKey, message, history);
+    }
+    
+    if (url === '/api/gemini/analyze') {
+      if (!localApiKey) {
+        throw new Error('Gemini API Key is required for AI Insights. Please set it in Settings tab.');
+      }
+      const { gameHistory, targetEntity, gameType, akiWon } = payload;
+      
+      const prompt = `Analyze the following guess path in our cricket guessing game.
+Category: ${gameType}
+Target Entity: ${targetEntity}
+Outcome: ${akiWon ? 'Aki Won (Successfully guessed!)' : 'User Defeated Aki (Aki failed to guess!)'}
+Questions and Answers History:
+${JSON.stringify(gameHistory, null, 2)}
+
+Provide a sports commentator style breakdown of how Aki-Cricket bowled (the questions asked) and how the user played (the answers given). Review critical decision points, like when the search space collapsed or if there was any misleading answer. Keep it fun, interactive, and structured as a commentary highlight review, under 300 words.`;
+
+      const analysis = await callGeminiDirect(localApiKey, prompt);
+      return { analysis };
+    }
+    
+    if (url === '/api/gemini/expand') {
+      if (!localApiKey) {
+        throw new Error('Gemini API Key is required for AI Expansion Lab. Please set it in Settings tab.');
+      }
+      const { entityName, category } = payload;
+      
+      const prompt = `We have an IPL cricket Akinator game. We need to add a new entity to our database.
+Category: ${category} (must be 'player', 'team', or 'scenario')
+Entity Name: ${entityName}
+
+Identify the correct attributes for this entity based on the following schemas. ALL attributes in the returned "attributes" object must be BOOLEANS (true/false).
+
+For 'player', set the boolean attributes:
+- active: currently active in IPL (squad or played last season)
+- overseas: non-Indian player
+- batsman: primarily batsman or wicketkeeper
+- bowler: primarily bowler
+- allrounder: recognized all-rounder
+- captain: has captained an IPL team
+- trophy: has won at least one IPL trophy
+- orangeCap: has won Orange Cap
+- purpleCap: has won Purple Cap
+- spinner: spin bowler (or spin-bowling allrounder)
+- fastBowler: fast/medium bowler (or fast-bowling allrounder)
+- csk: played for CSK
+- mi: played for MI
+- rcb: played for RCB
+- kkr: played for KKR
+- leftHanded: left-handed batsman or bowler
+- century: has scored a century in IPL
+- fiveWickets: has taken 5-wicket haul in IPL
+- hemisphere: represents southern hemisphere country (Aus, SA, NZ)
+
+For 'team', set the boolean attributes:
+- active: currently active in IPL
+- wonTrophy: has won at least one IPL trophy
+- multipleTrophies: has won more than one trophy
+- blueJersey: primary jersey color is blue
+- redJersey: primary jersey color is red
+- founded2008: was one of the original 2008 teams
+- captainedByDhoni: captained by MS Dhoni at some point
+- captainedByKohli: captained by Virat Kohli at some point
+- captainedByRohit: captained by Rohit Sharma at some point
+- playInSouth: home venue is in South India (CSK, RCB, SRH)
+
+For 'scenario', set the boolean attributes:
+- occurredInFinal: happened in an IPL final
+- lastBallFinish: decided on the final ball of the innings
+- involvedCSK: CSK was one of the playing teams
+- involvedMI: MI was one of the playing teams
+- involvedRCB: RCB was one of the playing teams
+- individualRecord: famous for an individual record-breaking performance
+- battingFeat: primarily a batting milestone or chase
+- bowlingFeat: primarily a bowling milestone (hat-trick, 5-for, etc.)
+- occurredInFirstDecade: happened in 2008-2017
+- occurredPost2020: happened in 2020 or later
+- wonByChasing: team chasing won the match
+- superOver: match involved a super over
+
+Provide your response in JSON format. Do not wrap it in markdown. Output EXACTLY this structure:
+{
+  "name": "${entityName}",
+  "attributes": {
+    // ... matching boolean keys for category
+  }
+}`;
+
+      const resText = await callGeminiDirect(localApiKey, prompt, null, true);
+      const generatedEntity = JSON.parse(resText);
+      
+      const offlineDatasets = JSON.parse(localStorage.getItem('offline_datasets') || '{"player":[],"team":[],"scenario":[]}');
+      if (!offlineDatasets[category]) {
+        offlineDatasets[category] = [];
+      }
+      const exists = offlineDatasets[category].find(e => e.name.toLowerCase() === generatedEntity.name.toLowerCase());
+      if (exists) {
+        throw new Error(`"${generatedEntity.name}" already exists in the local database!`);
+      }
+      
+      offlineDatasets[category].push(generatedEntity);
+      localStorage.setItem('offline_datasets', JSON.stringify(offlineDatasets));
+      
+      return { message: `Successfully added ${generatedEntity.name} to the game!`, entity: generatedEntity };
+    }
+    
+    throw new Error(`Unknown API endpoint: ${url}`);
+  }
+
   // Helper API fetch wrapper
   async function apiFetch(url, options = {}) {
+    if (useLocalFallback) {
+      return handleOfflineRequest(url, options);
+    }
+
     const token = sessionStorage.getItem('auth_token');
     const headers = options.headers || {};
     if (token) {
@@ -1014,7 +1396,9 @@ Describe the significance of the entity in IPL history and wrap it in fun sports
   });
 
   // Initialize page on load
-  checkAuth();
+  detectBackend().then(() => {
+    checkAuth();
+  });
 };
 
 if (document.readyState === "loading") {
